@@ -1,0 +1,4 @@
+interface:
+  display_name: "SketchUp Render Workflow"
+  short_description: "Export scenes and organize AI renders."
+  default_prompt: "Use $sketchup-render-workflow to export SketchUp scenes, create faithful render prompts, and organize the final images."
