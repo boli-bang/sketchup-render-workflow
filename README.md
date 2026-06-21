@@ -48,6 +48,7 @@ sketchup-render-workflow/
 │   └── iteration.md
 └── scripts/
     ├── export_scenes_4k.rb
+    ├── create_cinematic_scenes.rb
     ├── make_contact_sheet.py
     └── organize_render_images.py
 ```
@@ -55,12 +56,50 @@ sketchup-render-workflow/
 ## 核心流程
 
 1. 在 SketchUp 中打开 `.skp` 项目。
-2. 用 `export_scenes_4k.rb` 导出所有场景参考图。
-3. 检查导出的 PNG 数量、尺寸和顺序。
-4. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
-5. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
-6. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
-7. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
+2. 如果模型没有展示场景，先询问要生成几个候选镜头；默认 13 个，也可以改成 3 个、6 个或其他数量。
+3. 用 `export_scenes_4k.rb` 导出所有场景参考图。
+4. 检查导出的 PNG 数量、尺寸和顺序。
+5. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
+6. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
+7. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
+8. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
+
+## 自动创建候选镜头
+
+如果 `.skp` 只有模型、没有像 Enscape 场景那样设置好的视角，可以先在 SketchUp Ruby Console 中执行：
+
+```ruby
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+默认会根据模型包围盒自动创建 13 个场景。如果只想生成 6 个，可以先设置 `SCENE_COUNT`：
+
+```ruby
+SCENE_COUNT = 6
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+推荐交互规则：
+
+- 用户直接说“OK / 同意 / 继续”：使用默认 13 个
+- 用户说“生成 6 个”：设置 `SCENE_COUNT = 6`
+- 用户说“先试 3 个”：设置 `SCENE_COUNT = 3`
+
+最多支持 13 个内置候选场景：
+
+- 主入口 45 度
+- 草坪庭院低机位
+- 建筑正面展示
+- 左右前侧景观
+- 侧面和背侧关系
+- 高位鸟瞰
+- 屋顶与草坪关系
+- 景观入口近景
+- 材质立面近景
+- 黄昏主视觉
+- 作品集封面广角
+
+这些镜头是“第一轮候选分镜”，不是最终摄影师判断。推荐导出后生成联系表，筛掉弱角度，再手动或脚本微调。
 
 ## SketchUp 场景导出
 
@@ -211,6 +250,7 @@ sketchup-render-workflow/
 │   └── iteration.md
 └── scripts/
     ├── export_scenes_4k.rb
+    ├── create_cinematic_scenes.rb
     ├── make_contact_sheet.py
     └── organize_render_images.py
 ```
@@ -218,12 +258,50 @@ sketchup-render-workflow/
 ## Main Workflow
 
 1. Open the `.skp` project in SketchUp.
-2. Export all scenes with `export_scenes_4k.rb`.
-3. Verify the exported PNG count, dimensions, and scene order.
-4. Generate AI render prompts from each reference image while preserving design fidelity.
-5. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
-6. Rename the final set and move duplicate versions into a backup folder.
-7. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
+2. If the model has no presentation scenes, ask how many candidate scenes to create. Use 13 by default, but allow 3, 6, or another requested count.
+3. Export all scenes with `export_scenes_4k.rb`.
+4. Verify the exported PNG count, dimensions, and scene order.
+5. Generate AI render prompts from each reference image while preserving design fidelity.
+6. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
+7. Rename the final set and move duplicate versions into a backup folder.
+8. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
+
+## Creating Candidate Camera Scenes
+
+If a `.skp` file only contains geometry and has no Enscape-style presentation scenes, run this in SketchUp Ruby Console:
+
+```ruby
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+By default, the script creates 13 scenes. To create a smaller first batch, set `SCENE_COUNT` before loading the script:
+
+```ruby
+SCENE_COUNT = 6
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+Recommended interaction rule:
+
+- If the user says "OK", "yes", or "continue" without a number, use the default 13 scenes.
+- If the user asks for 6 scenes, set `SCENE_COUNT = 6`.
+- If the user wants a quick 3-scene test, set `SCENE_COUNT = 3`.
+
+The script estimates the active model's bounding box and can create up to 13 built-in scene candidates:
+
+- Main entrance 45-degree view
+- Low lawn/courtyard view
+- Front elevation presentation
+- Left and right landscape perspectives
+- Side and rear relationship views
+- High bird's-eye overview
+- Roof and lawn relationship
+- Landscape entrance close-up
+- Material facade close-up
+- Dusk hero view
+- Wide portfolio cover shot
+
+These are first-pass candidate shots, not final art direction. Export them, make a contact sheet, then keep, adjust, or replace weak angles.
 
 ## Exporting SketchUp Scenes
 

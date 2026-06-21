@@ -16,12 +16,40 @@ Prioritize fidelity to the model. The rendered image should preserve camera, mas
 
 1. Identify the `.skp` file, active SketchUp version, and intended output folder.
 2. If SketchUp is already open, use the active model. Otherwise open the file with the installed SketchUp app.
-3. Export scene references with `scripts/export_scenes_4k.rb` through SketchUp Ruby Console or a SketchUp automation route.
-4. Verify the exported PNG count, dimensions, and scene ordering.
-5. Generate a contact sheet with `scripts/make_contact_sheet.py` whenever there are many reference or rendered images.
-6. Prompt image generation from each reference with strict fidelity language. Do not add people, cars, logos, furniture, or new architectural elements unless requested.
-7. After the user downloads rendered images, use `scripts/organize_render_images.py` to rename the final set and move duplicates to `_重复备份`.
-8. Preserve intermediate references and logs. Never delete duplicates unless the user explicitly asks.
+3. If the model has no useful saved scenes, ask how many candidate cinematic scenes to create. Default to 13 when the user says OK/yes/continue or gives no number. Create candidate scenes with `scripts/create_cinematic_scenes.rb`.
+4. Export scene references with `scripts/export_scenes_4k.rb` through SketchUp Ruby Console or a SketchUp automation route.
+5. Verify the exported PNG count, dimensions, and scene ordering.
+6. Generate a contact sheet with `scripts/make_contact_sheet.py` whenever there are many reference or rendered images.
+7. Prompt image generation from each reference with strict fidelity language. Do not add people, cars, logos, furniture, or new architectural elements unless requested.
+8. After the user downloads rendered images, use `scripts/organize_render_images.py` to rename the final set and move duplicates to `_重复备份`.
+9. Preserve intermediate references and logs. Never delete duplicates unless the user explicitly asks.
+
+## Creating Candidate Scenes
+
+For a model that only contains geometry and lacks presentation scenes, first ask for the scene count:
+
+```text
+This model has no presentation scenes. Create the default 13 cinematic candidate scenes, or use another number such as 3 or 6?
+```
+
+If the user agrees without giving a number, use 13.
+
+Create the default 13 scenes:
+
+```ruby
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+Create a custom number of scenes:
+
+```ruby
+SCENE_COUNT = 6
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
+```
+
+The script estimates the model bounds and adds up to 13 scenes named `AI Cinematic 01...13`: entrance 45-degree views, low lawn/courtyard views, side and rear views, bird's-eye views, material close-ups, dusk hero, and a wide cover shot.
+
+Treat these as a first pass, not final art direction. Export them, make a contact sheet, then keep, adjust, or replace weak angles. The goal is to turn a "model-only" project into a scene-based project before AI rendering.
 
 ## Exporting From SketchUp
 
@@ -76,6 +104,7 @@ Read `references/iteration.md` when improving this skill after a real project. U
 ## Resources
 
 - `scripts/export_scenes_4k.rb`: SketchUp Ruby exporter for active model scenes.
+- `scripts/create_cinematic_scenes.rb`: Create 13 candidate cinematic camera scenes for model-only projects.
 - `scripts/make_contact_sheet.py`: Create a labeled contact sheet from image files.
 - `scripts/organize_render_images.py`: Rename a selected image set and move duplicates to backup.
 - `references/iteration.md`: Rules for evolving the skill after repeated use.
