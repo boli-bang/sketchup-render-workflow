@@ -5,6 +5,7 @@ WIDTH = 3840 unless defined?(WIDTH)
 HEIGHT = 2160 unless defined?(HEIGHT)
 START_INDEX = 1 unless defined?(START_INDEX)
 END_INDEX = nil unless defined?(END_INDEX)
+SCENE_INDICES = nil unless defined?(SCENE_INDICES)
 
 model = Sketchup.active_model
 raise "No active SketchUp model" unless model
@@ -29,8 +30,30 @@ safe_model_name = model_name.gsub(/[\/\\:*?"<>|]/, "_")
 out_dir = File.join(base_dir, "#{safe_model_name}_scene_exports_4k")
 Dir.mkdir(out_dir) unless Dir.exist?(out_dir)
 
-finish = END_INDEX || pages.length
-selected = pages.each_with_index.select { |_page, i| (i + 1) >= START_INDEX && (i + 1) <= finish }
+def parse_scene_indices(value)
+  return nil if value.nil?
+  return value if value.is_a?(Array)
+
+  value.to_s.split(",").flat_map do |part|
+    part = part.strip
+    next [] if part.empty?
+    if part.include?("-")
+      start_s, finish_s = part.split("-", 2)
+      (start_s.to_i..finish_s.to_i).to_a
+    else
+      [part.to_i]
+    end
+  end
+end
+
+explicit_indices = parse_scene_indices(SCENE_INDICES)
+if explicit_indices && !explicit_indices.empty?
+  wanted = explicit_indices.uniq
+  selected = pages.each_with_index.select { |_page, i| wanted.include?(i + 1) }
+else
+  finish = END_INDEX || pages.length
+  selected = pages.each_with_index.select { |_page, i| (i + 1) >= START_INDEX && (i + 1) <= finish }
+end
 raise "No scenes selected" if selected.empty?
 
 log_path = File.join(out_dir, "#{safe_model_name}_scene_export_log.txt")
@@ -38,6 +61,7 @@ File.open(log_path, "a") do |log|
   log.puts "Export started: #{Time.now}"
   log.puts "Model: #{model_path}"
   log.puts "Size: #{WIDTH}x#{HEIGHT}"
+  log.puts "Scene indices: #{explicit_indices ? explicit_indices.join(",") : "#{START_INDEX}-#{END_INDEX || pages.length}"}"
   selected.each do |page, zero_index|
     one_index = zero_index + 1
     model.pages.selected_page = page

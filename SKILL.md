@@ -17,7 +17,7 @@ Prioritize fidelity to the model. The rendered image should preserve camera, mas
 1. Identify the `.skp` file, active SketchUp version, and intended output folder.
 2. If SketchUp is already open, use the active model. Otherwise open the file with the installed SketchUp app.
 3. If the model has no useful saved scenes, ask how many candidate cinematic scenes to create. Default to 13 when the user says OK/yes/continue or gives no number. Create candidate scenes with `scripts/create_cinematic_scenes.rb`.
-4. Export scene references with `scripts/export_scenes_4k.rb` through SketchUp Ruby Console or a SketchUp automation route.
+4. If useful saved scenes exist, ask whether to export all scenes or only specific scene numbers. Export scene references with `scripts/export_scenes_4k.rb` through SketchUp Ruby Console or a SketchUp automation route.
 5. Verify the exported PNG count, dimensions, and scene ordering.
 6. Generate a contact sheet with `scripts/make_contact_sheet.py` whenever there are many reference or rendered images.
 7. Prompt image generation from each reference with strict fidelity language. Do not add people, cars, logos, furniture, or new architectural elements unless requested.
@@ -55,13 +55,36 @@ Treat these as a first pass, not final art direction. Export them, make a contac
 
 Use `scripts/export_scenes_4k.rb` as the default Ruby exporter. It exports all scenes in the active model to a sibling folder named after the model, with numbered PNG files and a log.
 
+Before exporting a model with saved scenes, report the scene count and ask:
+
+```text
+This model has 13 saved scenes. Export all scenes, or only specific numbers such as 1,3,5 or 2-6?
+```
+
+If the user says OK/yes/continue without selecting numbers, export all scenes.
+
 Typical SketchUp Ruby Console command:
 
 ```ruby
 load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
 ```
 
-If the user only wants a subset, edit the constants at the top of the copied script or create a project-local copy before loading it. Prefer 3840x2160 unless the user requests another size.
+If the user only wants a contiguous range:
+
+```ruby
+START_INDEX = 2
+END_INDEX = 6
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
+```
+
+If the user wants non-contiguous scenes:
+
+```ruby
+SCENE_INDICES = "1,3,5,8-10"
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
+```
+
+Prefer 3840x2160 unless the user requests another size.
 
 ## Prompting AI Renders
 

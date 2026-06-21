@@ -57,12 +57,13 @@ sketchup-render-workflow/
 
 1. 在 SketchUp 中打开 `.skp` 项目。
 2. 如果模型没有展示场景，先询问要生成几个候选镜头；默认 13 个，也可以改成 3 个、6 个或其他数量。
-3. 用 `export_scenes_4k.rb` 导出所有场景参考图。
-4. 检查导出的 PNG 数量、尺寸和顺序。
-5. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
-6. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
-7. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
-8. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
+3. 如果已有展示场景，先询问“全部导出，还是只导出指定编号”。
+4. 用 `export_scenes_4k.rb` 导出场景参考图。
+5. 检查导出的 PNG 数量、尺寸和顺序。
+6. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
+7. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
+8. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
+9. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
 
 ## 自动创建候选镜头
 
@@ -103,6 +104,14 @@ load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinemati
 
 ## SketchUp 场景导出
 
+如果模型已经有保存好的场景，推荐先询问：
+
+```text
+检测到这个模型有 13 个场景。要全部导出，还是只导出指定编号？比如 1,3,5 或 2-6。
+```
+
+用户直接说“OK / 全部 / 继续”时，导出全部场景。
+
 在 SketchUp Ruby Console 中执行：
 
 ```ruby
@@ -118,10 +127,16 @@ load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4
 如果只想导出部分场景，可以复制脚本到项目目录，修改顶部常量：
 
 ```ruby
-WIDTH = 3840
-HEIGHT = 2160
 START_INDEX = 1
-END_INDEX = nil
+END_INDEX = 5
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
+```
+
+如果只想导出不连续的指定镜头：
+
+```ruby
+SCENE_INDICES = "1,3,5,8-10"
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
 ```
 
 ## 生成联系表
@@ -259,12 +274,13 @@ sketchup-render-workflow/
 
 1. Open the `.skp` project in SketchUp.
 2. If the model has no presentation scenes, ask how many candidate scenes to create. Use 13 by default, but allow 3, 6, or another requested count.
-3. Export all scenes with `export_scenes_4k.rb`.
-4. Verify the exported PNG count, dimensions, and scene order.
-5. Generate AI render prompts from each reference image while preserving design fidelity.
-6. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
-7. Rename the final set and move duplicate versions into a backup folder.
-8. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
+3. If saved presentation scenes already exist, ask whether to export all scenes or selected scene numbers.
+4. Export scenes with `export_scenes_4k.rb`.
+5. Verify the exported PNG count, dimensions, and scene order.
+6. Generate AI render prompts from each reference image while preserving design fidelity.
+7. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
+8. Rename the final set and move duplicate versions into a backup folder.
+9. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
 
 ## Creating Candidate Camera Scenes
 
@@ -305,6 +321,14 @@ These are first-pass candidate shots, not final art direction. Export them, make
 
 ## Exporting SketchUp Scenes
 
+If the model already has saved scenes, ask first:
+
+```text
+This model has 13 saved scenes. Export all scenes, or only specific numbers such as 1,3,5 or 2-6?
+```
+
+If the user says "OK", "all", or "continue", export all scenes.
+
 Run this in SketchUp Ruby Console:
 
 ```ruby
@@ -320,10 +344,16 @@ ModelName_scene_exports_4k/
 To export a subset, copy the Ruby script into a project folder and adjust the constants near the top:
 
 ```ruby
-WIDTH = 3840
-HEIGHT = 2160
 START_INDEX = 1
-END_INDEX = nil
+END_INDEX = 5
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
+```
+
+To export non-contiguous selected scenes:
+
+```ruby
+SCENE_INDICES = "1,3,5,8-10"
+load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/export_scenes_4k.rb"
 ```
 
 ## Creating a Contact Sheet
