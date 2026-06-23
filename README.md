@@ -73,7 +73,7 @@ sketchup-render-workflow/
 load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
 ```
 
-默认会根据模型包围盒自动创建 13 个场景。如果只想生成 6 个，可以先设置 `SCENE_COUNT`：
+默认会根据可见模型包围盒自动创建 13 个场景。如果只想生成 6 个，可以先设置 `SCENE_COUNT`：
 
 ```ruby
 SCENE_COUNT = 6
@@ -100,7 +100,17 @@ load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinemati
 - 黄昏主视觉
 - 作品集封面广角
 
-这些镜头是“第一轮候选分镜”，不是最终摄影师判断。推荐导出后生成联系表，筛掉弱角度，再手动或脚本微调。
+这些镜头是“第一轮候选分镜”，不是最终摄影师判断。推荐先导出 1-3 张测试图，检查建筑是否完整入画、竖线是否垂直、地平线是否稳定，再批量导出和渲染。
+
+### 自动找角度的当前策略
+
+这次迭代把“模型只有几何体、没有保存视角”的情况作为重点：
+
+- 优先用可见对象计算主体 bounds，避免隐藏或远处对象把相机拉偏。
+- 主建筑展示镜头默认使用两点透视：相机高度和目标高度对齐，`Z_AXIS` 作为向上方向。
+- 外观展示使用中长焦，减少广角畸变，尽量保留完整建筑和边界墙。
+- 设置相机后不再调用 `zoom_extents`，避免 SketchUp 自动重构图。
+- 先小批量导出并肉眼验图，通过后再进入 13 张或自定义数量的批量流程。
 
 ## SketchUp 场景导出
 
@@ -217,6 +227,8 @@ _重复备份/
 - 发现重复图并备份
 - 最终统一命名为 13 张效果图
 
+2026-06-23 更新：第二轮在“只有模型、缺少展示场景”的莱茵堡项目上验证了自动找角度模块。两点透视规则能输出建筑完整、横平竖直、可继续渲染的候选图；已用两个后侧角度完成“SketchUp 候选角度 -> AI 真实化渲染”的链路测试。
+
 ## License
 
 暂未指定开源许可证。发布到 GitHub 前，如果希望别人可以自由复用、修改和传播，建议后续补充 MIT、Apache-2.0 或其他合适的许可证。
@@ -290,7 +302,7 @@ If a `.skp` file only contains geometry and has no Enscape-style presentation sc
 load "/Users/bang/.codex/skills/sketchup-render-workflow/scripts/create_cinematic_scenes.rb"
 ```
 
-By default, the script creates 13 scenes. To create a smaller first batch, set `SCENE_COUNT` before loading the script:
+By default, the script creates 13 scenes from visible model bounds. To create a smaller first batch, set `SCENE_COUNT` before loading the script:
 
 ```ruby
 SCENE_COUNT = 6
@@ -317,7 +329,17 @@ The script estimates the active model's bounding box and can create up to 13 bui
 - Dusk hero view
 - Wide portfolio cover shot
 
-These are first-pass candidate shots, not final art direction. Export them, make a contact sheet, then keep, adjust, or replace weak angles.
+These are first-pass candidate shots, not final art direction. Export one to three test views first, check complete building framing, vertical walls, and a stable horizon, then continue to batch export and rendering.
+
+### Current Auto-Camera Strategy
+
+This iteration focuses on geometry-only `.skp` models without saved presentation scenes:
+
+- Estimate the subject from visible objects, so hidden or far-away entities do not distort the camera.
+- Use two-point architectural perspective for primary exterior views: the eye height and target height are aligned, with `Z_AXIS` as the up vector.
+- Use moderate telephoto focal lengths for exterior presentation shots to reduce wide-angle distortion and keep the full villa and boundary walls in frame.
+- Avoid `zoom_extents` after setting the camera because it can override the intended composition.
+- Validate a small test batch visually before scaling to 13 or another requested scene count.
 
 ## Exporting SketchUp Scenes
 
@@ -433,6 +455,8 @@ The first version has been tested on a real project:
 - Checked manually downloaded images with a contact sheet
 - Detected and backed up a duplicate
 - Renamed the final set into 13 clean render images
+
+2026-06-23 update: the second iteration was validated on a geometry-only Laiyinbao villa model. The two-point camera rules produced complete, upright candidate architectural views, and two rear-side candidates successfully passed the path from SketchUp camera export to photorealistic AI rendering.
 
 ## License
 

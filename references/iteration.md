@@ -23,3 +23,24 @@ Use this reference when updating the skill after a real SketchUp rendering proje
 - User-downloaded image folders may contain one extra duplicate; move duplicates to `_重复备份` instead of deleting.
 - Generated-image tools may display results inline without exposing a file path; ask the user to download images before final organization.
 - For landscape visualizations, explicitly replace symbolic ring-like groundcover with organic planting while preserving planting locations.
+- For model-only villas, raw model bounds may include hidden or irrelevant geometry; derive candidate cameras from visible entity bounds first.
+- For primary exterior views, two-point perspective is the default quality gate: align eye height and target height, keep `Z_AXIS` up, and verify vertical walls before rendering.
+- Avoid `view.zoom_extents` after setting a composed SketchUp camera because it can undo carefully tuned framing.
+- Validate one to three candidate views visually before scaling to a full scene set; AI rendering should not be used to rescue bad camera composition.
+
+## 2026-06-23 Laiyinbao Auto-Camera Iteration
+
+Problem: a `.skp` project with only model geometry did not have the 13 presentation scenes that made the Xingyaoge workflow smooth. Early automatic angles missed the building or produced weak, tilted compositions.
+
+Implementation update:
+
+- Updated `scripts/create_cinematic_scenes.rb` to compute bounds from visible top-level entities before falling back to raw model bounds.
+- Tuned camera radius and focal lengths toward complete-building architectural views.
+- Removed `zoom_extents` from the camera-setting path.
+- Made primary exterior scenes two-point by aligning camera eye height and target height.
+
+Validation result:
+
+- Test exports kept the full villa in frame with stable verticals.
+- Two rear-side candidate angles were rendered into photorealistic previews without redesigning the building massing.
+- Remaining limitation: candidate scenes are still first-pass art direction and must be contact-sheet reviewed before a full production render batch.
