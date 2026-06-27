@@ -11,6 +11,7 @@ English documentation is included below for international users.
 - 打开或接管已经打开的 SketchUp 模型
 - 将 SketchUp 场景批量导出为 4K PNG 参考图
 - 基于参考图生成高还原度建筑效果图提示词
+- 当模型缺少园林、室内或软装时，先审计缺失项，再生成可确认的设计补全方向
 - 检查 AI 生成图是否混入旧图、重复图或顺序错误
 - 将最终效果图统一重命名为 `项目_AI效果图_01.png` 这类格式
 - 把重复版本移动到 `_重复备份`，不误删原图
@@ -45,6 +46,7 @@ sketchup-render-workflow/
 ├── agents/
 │   └── openai.yaml
 ├── references/
+│   ├── design_completion.md
 │   └── iteration.md
 └── scripts/
     ├── export_scenes_4k.rb
@@ -60,10 +62,11 @@ sketchup-render-workflow/
 3. 如果已有展示场景，先询问“全部导出，还是只导出指定编号”。
 4. 用 `export_scenes_4k.rb` 导出场景参考图。
 5. 检查导出的 PNG 数量、尺寸和顺序。
-6. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
-7. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
-8. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
-9. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
+6. 如果模型缺少园林、室内或软装，先审计缺失项，并让用户确认是保真渲染还是设计补全。
+7. 基于每张参考图生成 AI 渲染提示词，重点保持设计还原。
+8. 用户手动下载 AI 生成图后，用联系表检查是否混入旧图或重复图。
+9. 用整理脚本统一重命名，并把重复版本移动到备份文件夹。
+10. 如果遇到新问题，把经验补进 `SKILL.md`、`references/iteration.md` 或脚本里。
 
 ## 自动创建候选镜头
 
@@ -205,6 +208,27 @@ _重复备份/
 把一圈一圈的地被符号转成自然的低矮灌木、蕨类、草本、苔藓、碎石和覆土，保留原有种植区域，不改变设计布局。
 ```
 
+## 设计补全模式
+
+当模型没有完整园林、室内设计或软装时，使用 `references/design_completion.md`。
+
+这个模式的原则是：**不假装知道缺失设计，而是先保留现有建筑，再提出可确认的设计假设。**
+
+需要用户确认的节点：
+
+- 是否只渲染已有设计，还是补全缺失的园林、室内或软装。
+- 如果缺失设计会明显影响风格，先给 2-3 个方向让用户选择。
+- 用户直接说“OK / 继续”时，默认选最克制、最贴合建筑和已有材质的方向。
+- 先跑 1-3 张代表性测试图，通过后再批量生成。
+
+室内取景会沿用外立面阶段学到的经验：
+
+- 优先两点透视，保持墙体、门窗、柜体竖线稳定。
+- 视高通常控制在 1.45-1.65m。
+- 避免过广角导致房间变形；每张图只表达一个明确空间目的。
+- 空房间要先判断或确认房间功能，再做软装和灯光补全。
+- 如果测试图漂亮但改变了结构、门窗、楼梯或空间比例，立即停止并收紧提示词。
+
 ## 可迭代方式
 
 这个 skill 的目标是边用边进化：
@@ -213,6 +237,7 @@ _重复备份/
 - 常见提示词修正，补到“渲染提示词原则”
 - 重复写过的整理逻辑，做成 `scripts/` 里的参数
 - 项目复盘经验，补到 `references/iteration.md`
+- 缺失设计补全、室内取景和用户确认节点，补到 `references/design_completion.md`
 
 保持原则：项目经验可以沉淀，但不要把某一个项目的专有路径、文件名或偏好写死到通用脚本里。
 
@@ -228,6 +253,8 @@ _重复备份/
 - 最终统一命名为 13 张效果图
 
 2026-06-23 更新：第二轮在“只有模型、缺少展示场景”的莱茵堡项目上验证了自动找角度模块。两点透视规则能输出建筑完整、横平竖直、可继续渲染的候选图；已用两个后侧角度完成“SketchUp 候选角度 -> AI 真实化渲染”的链路测试。
+
+2026-06-27 更新：新增“设计补全模式”。当模型缺少园林、室内或软装时，先做缺失项审计和用户确认，再补全设计方向；室内取景明确继承外立面阶段的两点透视、视高、焦距和小批量验图经验，减少后续反复调构图的成本。
 
 ## License
 
@@ -246,6 +273,7 @@ This is an iterative Codex skill for architectural visualization workflows with 
 - Open or continue from an active SketchUp model
 - Export SketchUp scenes as high-resolution 4K PNG references
 - Create AI image prompts that preserve the original architectural design
+- Audit missing landscape, interior, or soft-furnishing design and propose confirmable completion directions
 - Check whether downloaded AI renders include old images, duplicates, or ordering mistakes
 - Rename final render images as `Project_AI_Render_01.png`, `Project_AI_Render_02.png`, etc.
 - Move duplicate versions into `_重复备份` without deleting source files
@@ -274,6 +302,7 @@ sketchup-render-workflow/
 ├── agents/
 │   └── openai.yaml
 ├── references/
+│   ├── design_completion.md
 │   └── iteration.md
 └── scripts/
     ├── export_scenes_4k.rb
@@ -289,10 +318,11 @@ sketchup-render-workflow/
 3. If saved presentation scenes already exist, ask whether to export all scenes or selected scene numbers.
 4. Export scenes with `export_scenes_4k.rb`.
 5. Verify the exported PNG count, dimensions, and scene order.
-6. Generate AI render prompts from each reference image while preserving design fidelity.
-7. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
-8. Rename the final set and move duplicate versions into a backup folder.
-9. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
+6. If landscape, interior, or styling design is missing, audit the missing areas and ask whether to preserve only existing design or complete the missing parts.
+7. Generate AI render prompts from each reference image while preserving design fidelity.
+8. After manually downloading generated images, create a contact sheet to detect old files, duplicates, and ordering mistakes.
+9. Rename the final set and move duplicate versions into a backup folder.
+10. When a new issue appears, improve `SKILL.md`, `references/iteration.md`, or the scripts so the workflow gets better over time.
 
 ## Creating Candidate Camera Scenes
 
@@ -434,6 +464,27 @@ If SketchUp groundcover appears as symbolic rings or contour-like patches, add:
 Replace circular/ring-like groundcover symbols with natural low shrubs, ferns, grasses, moss, gravel, and soil mulch. Preserve the original planting areas and design layout.
 ```
 
+## Design Completion Mode
+
+When a model lacks landscape, interior design, styling, or soft furnishings, use `references/design_completion.md`.
+
+The principle is: **do not pretend missing design is known; preserve the existing architecture first, then propose explicit design assumptions for user confirmation.**
+
+User confirmation gates:
+
+- Ask whether to render only existing design or complete missing landscape, interior, or soft furnishing design.
+- If the missing design materially changes style, present 2-3 concise directions and ask the user to choose.
+- If the user says "OK" or "continue" without choosing, use the most restrained direction that matches the architecture and existing materials.
+- Render 1-3 representative tests first, then continue to a batch only after acceptance.
+
+Interior camera rules inherit the exterior lessons:
+
+- Prefer two-point perspective so walls, doors, windows, and cabinetry stay upright.
+- Use normal eye height around 1.45-1.65 m.
+- Avoid excessive wide-angle distortion; give each frame one clear spatial purpose.
+- For empty rooms, infer or confirm room function before adding furniture and lighting.
+- If a test image looks attractive but changes structure, openings, stairs, or room proportions, stop and tighten the prompt before continuing.
+
 ## Iteration Model
 
 This skill is meant to improve through real use:
@@ -442,6 +493,7 @@ This skill is meant to improve through real use:
 - Add useful prompt corrections to the prompt principles
 - Turn repeated file-management steps into script options
 - Store project learnings in `references/iteration.md`
+- Store missing-design completion, interior camera, and user confirmation patterns in `references/design_completion.md`
 
 Keep the workflow reusable. Do not hard-code one project's private paths, filenames, or preferences into the generic scripts.
 
@@ -457,6 +509,8 @@ The first version has been tested on a real project:
 - Renamed the final set into 13 clean render images
 
 2026-06-23 update: the second iteration was validated on a geometry-only Laiyinbao villa model. The two-point camera rules produced complete, upright candidate architectural views, and two rear-side candidates successfully passed the path from SketchUp camera export to photorealistic AI rendering.
+
+2026-06-27 update: added Design Completion Mode. When a model lacks landscape, interior, or soft furnishing design, the workflow now audits missing areas, asks for user confirmation, and carries the exterior two-point camera lessons into interior views to reduce repeated composition work.
 
 ## License
 

@@ -11,6 +11,7 @@ Use this skill to run a repeatable, iterative pipeline:
 SketchUp scene export -> visual QA/contact sheets -> AI render prompting -> download/import cleanup -> final numbered folder.
 
 Prioritize fidelity to the model. The rendered image should preserve camera, massing, material intent, object positions, and lighting direction unless the user explicitly asks to redesign.
+If the model lacks landscape, interior, or soft furnishing design and the user wants completion, read `references/design_completion.md` before prompting renders.
 
 ## Workflow
 
@@ -19,10 +20,11 @@ Prioritize fidelity to the model. The rendered image should preserve camera, mas
 3. If the model has no useful saved scenes, ask how many candidate cinematic scenes to create. Default to 13 when the user says OK/yes/continue or gives no number. Create scenes with `scripts/create_cinematic_scenes.rb`, then visually QA the first few exports before scaling.
 4. If useful saved scenes exist, ask whether to export all scenes or only specific scene numbers. Export scene references with `scripts/export_scenes_4k.rb` through SketchUp Ruby Console or a SketchUp automation route.
 5. Verify the exported PNG count, dimensions, and scene ordering.
-6. Generate a contact sheet with `scripts/make_contact_sheet.py` whenever there are many reference or rendered images.
-7. Prompt image generation from each reference with strict fidelity language. Do not add people, cars, logos, furniture, or new architectural elements unless requested.
-8. After the user downloads rendered images, use `scripts/organize_render_images.py` to rename the final set and move duplicates to `_重复备份`.
-9. Preserve intermediate references and logs. Never delete duplicates unless the user explicitly asks.
+6. If design is missing and the user wants completion, run the design-completion audit and confirmation gates from `references/design_completion.md`.
+7. Generate a contact sheet with `scripts/make_contact_sheet.py` whenever there are many reference or rendered images.
+8. Prompt image generation from each reference with strict fidelity language. Do not add people, cars, logos, furniture, or new architectural elements unless requested or confirmed through design completion mode.
+9. After the user downloads rendered images, use `scripts/organize_render_images.py` to rename the final set and move duplicates to `_重复备份`.
+10. Preserve intermediate references and logs. Never delete duplicates unless the user explicitly asks.
 
 ## Creating Candidate Scenes
 
@@ -109,6 +111,19 @@ For each render prompt, include:
 
 When exact fidelity matters, render in small batches and inspect results before continuing.
 
+## Design Completion Mode
+
+Use `references/design_completion.md` when the model is incomplete and the user asks to complete landscape, interior design, styling, or soft furnishings.
+
+Core rules:
+
+- Do not treat missing design as known; state what is missing and what can be preserved.
+- Ask whether to render only existing design or complete missing landscape/interior/soft furnishing design.
+- Present 2-3 concise design directions when style choices materially change the result.
+- If the user says OK/continue without choosing, use the most conservative direction that matches the architecture and existing materials.
+- Render 1-3 representative tests first, then continue only after the user accepts the design direction.
+- Carry exterior camera lessons into interiors: level camera, two-point perspective, believable eye height, moderate focal lengths, one clear room purpose per frame, and reject tilted/cropped references before rendering.
+
 ## Organizing Results
 
 When the user downloads generated images manually, first make a contact sheet. Use modification-time sorting for raw downloads because browser filenames are often inconsistent:
@@ -141,4 +156,5 @@ Read `references/iteration.md` when improving this skill after a real project. U
 - `scripts/create_cinematic_scenes.rb`: Create 13 candidate cinematic camera scenes for model-only projects.
 - `scripts/make_contact_sheet.py`: Create a labeled contact sheet from image files.
 - `scripts/organize_render_images.py`: Rename a selected image set and move duplicates to backup.
+- `references/design_completion.md`: Rules for completing missing landscape, interior, and soft furnishing design with user confirmation gates.
 - `references/iteration.md`: Rules for evolving the skill after repeated use.

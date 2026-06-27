@@ -44,3 +44,18 @@ Validation result:
 - Test exports kept the full villa in frame with stable verticals.
 - Two rear-side candidate angles were rendered into photorealistic previews without redesigning the building massing.
 - Remaining limitation: candidate scenes are still first-pass art direction and must be contact-sheet reviewed before a full production render batch.
+
+## 2026-06-27 Design Completion Iteration
+
+Goal: extend the workflow beyond faithful exterior rendering so it can handle models that lack landscape, interior design, or soft furnishings, while avoiding random AI redesign.
+
+Implementation update:
+
+- Added `references/design_completion.md` for missing-design audits, design direction confirmation, landscape completion, interior completion, and efficient interior camera rules.
+- Updated `SKILL.md` so missing landscape/interior/soft furnishing design triggers the design-completion audit before AI rendering.
+- Updated README and skill metadata so the GitHub documentation and Codex skill UI describe the new capability.
+
+Process lesson:
+
+- The exterior workflow spent significant time correcting camera composition. Interior design completion should front-load camera QA: level camera, two-point perspective, normal eye height, moderate focal length, one room purpose per frame, and 1-3 test renders before batching.
+- Missing design should be treated as a user-confirmed assumption. If the user has not confirmed whether to complete missing parts, do not batch render.
