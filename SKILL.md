@@ -122,6 +122,7 @@ Core rules:
 - Present 2-3 concise design directions when style choices materially change the result.
 - If the user says OK/continue without choosing, use the most conservative direction that matches the architecture and existing materials.
 - Render 1-3 representative tests first, then continue only after the user accepts the design direction.
+- For interiors, start from top-down floor/level interpretation before creating room cameras; identify room zones, circulation, glazing, terraces, and design anchors first.
 - Carry exterior camera lessons into interiors: level camera, two-point perspective, believable eye height, moderate focal lengths, one clear room purpose per frame, and reject tilted/cropped references before rendering.
 
 ## Organizing Results

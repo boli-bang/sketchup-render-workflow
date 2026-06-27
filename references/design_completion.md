@@ -76,6 +76,8 @@ Avoid:
 
 Interior work must be more careful than exterior work because missing information is larger.
 
+Before choosing room cameras, read the floor structure from plan views. Do not scatter cameras into the model first.
+
 Preserve:
 
 - Architectural shell, openings, ceiling heights, structural walls, stairs, window locations, and view direction.
@@ -96,6 +98,29 @@ Avoid:
 - Overwriting a minimalist architectural shell with a generic showroom look.
 - Adding brand logos, text, people, or implausible luxury props.
 
+## Floorplan-First Interior Workflow
+
+Use this before generating interior camera scenes:
+
+1. Export or inspect top-down plan views for each relevant level. If only one top view exists, use it to infer major first-floor and second-floor zones before creating any room cameras.
+2. Mark the major spatial zones from the plan: entrance, living/dining, kitchen, stair/core, bedrooms, terraces, courtyards, corridors, bathrooms, and service spaces.
+3. Identify design anchors: largest glazing, courtyard views, stairs, double-height voids, terrace openings, material transitions, and main circulation.
+4. Create a short floorplan interpretation for the user:
+
+```text
+From the top view I read the first floor as: entrance/service on one side, a central living/courtyard relationship, and large glazing toward the lawn. The second floor appears to focus on private rooms and terraces. I will treat the main direction as <direction> unless you correct it.
+```
+
+5. Propose the interior completion direction before camera creation. The direction should connect to the plan logic, not only to style words.
+6. After the user accepts the direction, create room cameras in this order:
+   - main public space first;
+   - circulation/stair/void second;
+   - room or terrace relationship third;
+   - detail/material view last.
+7. Each camera must name its room purpose and view logic, for example `Living room -> courtyard glazing`, not just `Interior 01`.
+
+This avoids random interior point sampling and makes the workflow faster than trial-and-error camera placement.
+
 ## Efficient Interior Camera Rules
 
 Carry over the exterior camera lessons before spending time rendering:
@@ -108,6 +133,7 @@ Carry over the exterior camera lessons before spending time rendering:
 - Keep windows, doors, ceiling lines, and cabinetry edges straight; reject references with tilted verticals before rendering.
 - Export one test image per interior scene type first: wide room, material detail, view toward window, and circulation/threshold.
 - If the room is empty, first ask or infer the room function. Do not furnish an undefined space blindly.
+- Use plan-derived room zones before placing cameras; if the plan has not been interpreted, stop and do that first.
 
 Suggested first-pass interior scene set:
 
@@ -142,7 +168,9 @@ Quality target: photorealistic high-end architectural visualization with natural
 Stop and ask the user instead of continuing when:
 
 - The model does not reveal enough to infer room function.
+- The interior workflow has not started from a top-down plan or level-by-level spatial interpretation.
 - The user has not confirmed whether missing parts should be completed or left empty.
+- The user has not confirmed the interior design direction after the floorplan interpretation.
 - A generated image changes architecture, openings, or hardscape geometry.
 - The first test image is visually impressive but violates the design intent.
 - Multiple plausible design styles fit equally well and the choice would strongly change the result.

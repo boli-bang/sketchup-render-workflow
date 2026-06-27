@@ -59,3 +59,20 @@ Process lesson:
 
 - The exterior workflow spent significant time correcting camera composition. Interior design completion should front-load camera QA: level camera, two-point perspective, normal eye height, moderate focal length, one room purpose per frame, and 1-3 test renders before batching.
 - Missing design should be treated as a user-confirmed assumption. If the user has not confirmed whether to complete missing parts, do not batch render.
+
+## 2026-06-27 Laiyinbao Interior Camera Test
+
+Problem: direct interior point sampling produced exports, but the results lacked spatial logic. Early candidates were too close to walls, misread terraces as interiors, or had no room purpose.
+
+Observed results:
+
+- Explicit eye height improved the camera compared with raw bounds-based height.
+- Ray-clearance scoring helped avoid some near-wall views, but it still could not classify interior vs exterior/terrace reliably.
+- The useful candidates were the ones that accidentally aligned with visible glazing, circulation, or room-shell relationships.
+
+Process correction:
+
+- Interior design must start from top-down floor/level interpretation, not random camera placement.
+- First understand first-floor and second-floor structure, identify public/private/circulation/terrace zones, and confirm the design direction with the user.
+- Only then create room-specific cameras named by purpose, such as living-to-courtyard, stair-void, bedroom-to-terrace, or material detail.
+- Add cleanup of temporary AI scene pages before and after tests; too many scene tabs slow SketchUp and make iteration noisy.
